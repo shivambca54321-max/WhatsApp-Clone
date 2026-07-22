@@ -32,7 +32,7 @@ const getTransporter = () => {
 };
 
 export const sendEmail = async (to: string, subject: string, html: string): Promise<void> => {
-  const from = process.env.SMTP_FROM || 'noreply@whatsapp-clone.com';
+  const from = process.env.SMTP_FROM || (process.env.SMTP_USER ? `"Velo Chat" <${process.env.SMTP_USER}>` : 'noreply@whatsapp-clone.com');
 
   // If credentials are empty, log to console in dev mode
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
