@@ -28,9 +28,6 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 // Trust reverse proxy in production (Render, Vercel, Heroku)
 app.set('trust proxy', 1);
 
-// Connect Database
-connectDB();
-
 // Global Middlewares
 app.use(helmet({
   crossOriginResourcePolicy: false, // Allow loading local files in dev if needed
@@ -111,7 +108,12 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Listen
-server.listen(Number(PORT), '0.0.0.0', () => {
-  logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-});
+// Start Server after connecting DB
+const startServer = async () => {
+  await connectDB();
+  server.listen(Number(PORT), '0.0.0.0', () => {
+    logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  });
+};
+
+startServer();
