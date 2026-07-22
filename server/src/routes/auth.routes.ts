@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { 
   register, 
+  resendOTP,
   verifyEmail, 
   login, 
   logout, 
@@ -24,6 +25,7 @@ const router = Router();
 
 // Apply auth rate limiter for login, register, and reset flows
 router.post('/register', authLimiter, validate(registerSchema), register);
+router.post('/resend-otp', authLimiter, resendOTP);
 router.post('/verify-email', authLimiter, validate(verifyEmailSchema), verifyEmail);
 router.post('/login', authLimiter, validate(loginSchema), login);
 router.post('/logout', logout);

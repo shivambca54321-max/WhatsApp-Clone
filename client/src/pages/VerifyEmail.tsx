@@ -102,17 +102,10 @@ export const VerifyEmail: React.FC = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
     try {
-      await api.post('/auth/login', {
-        email,
-        password: 'dummy-password-to-trigger-resend-logic-safely',
-      });
+      const response = await api.post('/auth/resend-otp', { email });
+      setSuccessMessage(response.data.message || 'A new OTP has been sent to your email.');
     } catch (error: any) {
-      // Since it's unverified, the login controller automatically re-sends OTP on fail
-      if (error.response?.status === 403 && error.response?.data?.status === 'unverified') {
-        setSuccessMessage('A new OTP has been sent to your email.');
-      } else {
-        setErrorMessage('Failed to resend code. Please try again later.');
-      }
+      setErrorMessage(error.response?.data?.message || 'Failed to resend code. Please try again later.');
     }
   };
 

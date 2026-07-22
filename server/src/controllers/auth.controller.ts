@@ -72,6 +72,42 @@ export const register = async (
   }
 };
 
+export const resendOTP = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      throw new BadRequestError('Email is required');
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    if (user.isVerified) {
+      throw new BadRequestError('Email is already verified');
+    }
+
+    const otp = generateOTP();
+    user.verificationOTP = otp;
+    user.verificationOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    await sendVerificationOTPEmail(email, otp);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'A new OTP has been sent to your email.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const verifyEmail = async (
   req: Request,
   res: Response,
