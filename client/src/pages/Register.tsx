@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, Phone, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import api from '../services/api';
+import useAuthStore from '../store/useAuthStore';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -25,6 +26,7 @@ export const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { setAuth } = useAuthStore();
   const navigate = useNavigate();
 
   const {
@@ -48,8 +50,9 @@ export const Register: React.FC = () => {
       });
 
       if (response.data.status === 'success') {
-        // Redirect to OTP verification screen passing email state
-        navigate('/verify-email', { state: { email: data.email } });
+        const { accessToken, user } = response.data;
+        setAuth(user, accessToken);
+        navigate('/');
       }
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || 'Registration failed. Try again.');
