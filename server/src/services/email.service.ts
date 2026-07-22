@@ -1,14 +1,22 @@
 import nodemailer from 'nodemailer';
 import logger from '../utils/logger';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
-  port: parseInt(process.env.SMTP_PORT || '2525'),
-  auth: {
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
-  },
-});
+const getTransporter = () => {
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const port = parseInt(process.env.SMTP_PORT || '587');
+  const user = process.env.SMTP_USER || '';
+  const pass = process.env.SMTP_PASS || '';
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: user && pass ? { user, pass } : undefined,
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+};
 
 export const sendEmail = async (to: string, subject: string, html: string): Promise<void> => {
   const from = process.env.SMTP_FROM || 'noreply@whatsapp-clone.com';
@@ -21,6 +29,7 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
   }
 
   try {
+    const transporter = getTransporter();
     await transporter.sendMail({
       from,
       to,
