@@ -126,10 +126,13 @@ export const verifyEmail = async (
     }
 
     // Verify OTP
+    const cleanUserOtp = (user.verificationOTP || '').toString().trim();
+    const cleanInputOtp = (otp || '').toString().trim();
+
     if (
       !user.verificationOTP || 
       !user.verificationOTPExpires || 
-      user.verificationOTP !== otp || 
+      cleanUserOtp !== cleanInputOtp || 
       user.verificationOTPExpires.getTime() < Date.now()
     ) {
       throw new BadRequestError('Invalid or expired OTP');
