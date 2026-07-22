@@ -3,11 +3,13 @@ import dns from 'dns';
 import logger from '../utils/logger';
 
 // Fix for Node.js SRV DNS lookup issues on Windows / IPv6 ISP routers
-try {
-  dns.setDefaultResultOrder('ipv4first');
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch (e) {
-  // Ignore fallback if custom DNS setting is restricted
+if (process.platform === 'win32') {
+  try {
+    dns.setDefaultResultOrder('ipv4first');
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch (e) {
+    // Ignore fallback if custom DNS setting is restricted
+  }
 }
 
 export const connectDB = async (): Promise<void> => {
@@ -30,6 +32,5 @@ export const connectDB = async (): Promise<void> => {
     await mongoose.connect(connString);
   } catch (error) {
     logger.error('Failed to connect to MongoDB: %O', error);
-    process.exit(1);
   }
 };
