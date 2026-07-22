@@ -42,60 +42,32 @@ export const register = async (
       throw new ConflictError('Username is already taken');
     }
 
-    // Create User (auto-verified)
+    // Generate 6-digit OTP
+    const otp = generateOTP();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Create User (unverified)
     const user = new User({
       fullName,
       username,
       email,
       password,
       phone,
-      isVerified: true,
-      status: 'online',
+      isVerified: false,
+      verificationOTP: otp,
+      verificationOTPExpires: otpExpires,
+      status: 'offline',
     });
 
     await user.save();
 
-    // Create session and tokens for instant login
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
-
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const session = new Session({
-      user: user._id,
-      refreshToken,
-      deviceType: req.headers['user-agent'] || 'Unknown',
-      ipAddress: req.ip || '',
-      expiresAt,
-    });
-
-    await session.save();
-
-    // Set Refresh Token in Secure Cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    // Send verification OTP email
+    await sendVerificationOTPEmail(email, otp);
 
     res.status(201).json({
       status: 'success',
-      message: 'Registration successful.',
-      accessToken,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        username: user.username,
-        email: user.email,
-        phone: user.phone,
-        profilePhoto: user.profilePhoto,
-        coverPhoto: user.coverPhoto,
-        bio: user.bio,
-        about: user.about,
-        status: user.status,
-        themePreference: user.themePreference,
-        accentColor: user.accentColor,
-      },
+      message: 'Registration successful. Please check your email for the verification OTP.',
+      email: user.email,
     });
   } catch (error) {
     next(error);
@@ -119,7 +91,12 @@ export const resendOTP = async (
     }
 
     if (user.isVerified) {
-      throw new BadRequestError('Email is already verified');
+      res.status(200).json({
+        status: 'success',
+        message: 'Your email is already verified! You can proceed to log in.',
+        alreadyVerified: true,
+      });
+      return;
     }
 
     const otp = generateOTP();
@@ -131,7 +108,7 @@ export const resendOTP = async (
 
     res.status(200).json({
       status: 'success',
-      message: 'A new OTP has been sent to your email.',
+      message: 'A new 6-digit OTP code has been sent to your email.',
     });
   } catch (error) {
     next(error);
@@ -152,7 +129,48 @@ export const verifyEmail = async (
     }
 
     if (user.isVerified) {
-      throw new BadRequestError('Email is already verified');
+      // Create Session and tokens for already verified user
+      const accessToken = generateAccessToken(user._id);
+      const refreshToken = generateRefreshToken(user._id);
+
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const session = new Session({
+        user: user._id,
+        refreshToken,
+        deviceType: req.headers['user-agent'] || 'Unknown',
+        ipAddress: req.ip || '',
+        expiresAt,
+      });
+
+      await session.save();
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Email is already verified. Logging in...',
+        accessToken,
+        user: {
+          id: user._id,
+          fullName: user.fullName,
+          username: user.username,
+          email: user.email,
+          phone: user.phone,
+          profilePhoto: user.profilePhoto,
+          coverPhoto: user.coverPhoto,
+          bio: user.bio,
+          about: user.about,
+          status: user.status,
+          themePreference: user.themePreference,
+          accentColor: user.accentColor,
+        },
+      });
+      return;
     }
 
     // Verify OTP
@@ -240,9 +258,21 @@ export const login = async (
       throw new UnauthorizedError('Invalid credentials');
     }
 
-    // Auto-verify user if unverified
+    // If user is unverified, generate OTP & send email
     if (!user.isVerified) {
-      user.isVerified = true;
+      const otp = generateOTP();
+      user.verificationOTP = otp;
+      user.verificationOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
+      await user.save();
+
+      await sendVerificationOTPEmail(email, otp);
+
+      res.status(403).json({
+        status: 'unverified',
+        message: 'Your email address is not verified yet. A 6-digit OTP code has been sent to your email.',
+        email: user.email,
+      });
+      return;
     }
 
     user.status = 'online';

@@ -104,6 +104,11 @@ export const VerifyEmail: React.FC = () => {
     try {
       const response = await api.post('/auth/resend-otp', { email });
       setSuccessMessage(response.data.message || 'A new OTP has been sent to your email.');
+      if (response.data.alreadyVerified) {
+        setTimeout(() => {
+          navigate('/login');
+        }, 1500);
+      }
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || 'Failed to resend code. Please try again later.');
     }

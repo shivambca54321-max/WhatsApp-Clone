@@ -50,9 +50,7 @@ export const Register: React.FC = () => {
       });
 
       if (response.data.status === 'success') {
-        const { accessToken, user } = response.data;
-        setAuth(user, accessToken);
-        navigate('/');
+        navigate('/verify-email', { state: { email: data.email } });
       }
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || 'Registration failed. Try again.');
