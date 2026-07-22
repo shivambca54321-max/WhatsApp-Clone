@@ -24,6 +24,11 @@ export const errorHandler = (
     // Mongoose bad Object ID
     statusCode = 400;
     message = `Invalid ${(err as any).path}: ${(err as any).value}`;
+  } else if ((err as any).code === 11000) {
+    // Mongo duplicate key error
+    statusCode = 409;
+    const field = Object.keys((err as any).keyValue || {})[0] || 'field';
+    message = `That ${field} is already registered.`;
   }
 
   // Log error

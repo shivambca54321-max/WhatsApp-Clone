@@ -31,13 +31,16 @@ export const register = async (
   try {
     const { fullName, username, email, password, phone } = req.body;
 
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanUsername = username.trim().toLowerCase();
+
     // Check if user already exists
-    const existingEmail = await User.findOne({ email });
+    const existingEmail = await User.findOne({ email: cleanEmail });
     if (existingEmail) {
       throw new ConflictError('Email is already registered');
     }
 
-    const existingUsername = await User.findOne({ username });
+    const existingUsername = await User.findOne({ username: cleanUsername });
     if (existingUsername) {
       throw new ConflictError('Username is already taken');
     }
@@ -48,9 +51,9 @@ export const register = async (
 
     // Create User (unverified)
     const user = new User({
-      fullName,
-      username,
-      email,
+      fullName: fullName.trim(),
+      username: cleanUsername,
+      email: cleanEmail,
       password,
       phone,
       isVerified: false,
