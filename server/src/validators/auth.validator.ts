@@ -31,3 +31,13 @@ export const verifyEmailSchema = z.object({
   email: z.string().email('Invalid email address'),
   otp: z.string().min(6, 'OTP must be 6 characters').max(6, 'OTP must be 6 characters'),
 });
+
+export const sendLoginOTPSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+export const loginWithOTPSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  otp: z.string().min(6, 'OTP must be 6 characters').max(6, 'OTP must be 6 characters'),
+});
+

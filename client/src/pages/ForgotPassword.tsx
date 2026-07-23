@@ -35,8 +35,8 @@ export const ForgotPassword: React.FC = () => {
       });
 
       if (response.data.status === 'success') {
-        // Redirect to Reset Password passing email
-        navigate('/reset-password', { state: { email: data.email } });
+        // Redirect to Reset Password passing email and initialOtp
+        navigate('/reset-password', { state: { email: data.email, initialOtp: response.data.otp } });
       }
     } catch (error: any) {
       setErrorMessage(error.response?.data?.message || 'Something went wrong. Please try again.');

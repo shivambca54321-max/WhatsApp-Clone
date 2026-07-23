@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { KeyRound, Lock, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { KeyRound, Lock, Eye, EyeOff, AlertCircle, CheckCircle2, Sparkles, ArrowLeft } from 'lucide-react';
 import api from '../services/api';
 
 const resetPasswordSchema = z.object({
@@ -23,6 +23,8 @@ export const ResetPassword: React.FC = () => {
   const location = useLocation();
 
   const email = location.state?.email || '';
+  const initialOtp = location.state?.initialOtp || '';
+  const [activeOtp, setActiveOtp] = useState<string>(initialOtp);
 
   useEffect(() => {
     if (!email) {
@@ -33,10 +35,20 @@ export const ResetPassword: React.FC = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      otp: initialOtp || '',
+    },
   });
+
+  const handleQuickFill = () => {
+    if (activeOtp) {
+      setValue('otp', activeOtp);
+    }
+  };
 
   const onSubmit = async (data: ResetPasswordFormValues) => {
     setLoading(true);
@@ -72,6 +84,14 @@ export const ResetPassword: React.FC = () => {
         transition={{ duration: 0.6 }}
         className="glass w-full max-w-[440px] rounded-2xl p-8 md:p-10 shadow-2xl relative z-10"
       >
+        <button
+          onClick={() => navigate('/login')}
+          className="mb-6 flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-all cursor-pointer"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Login
+        </button>
+
         <div className="mb-8 text-center">
           <h2 className="text-2xl font-bold tracking-tight">Set New Password</h2>
           <p className="mt-2 text-sm text-gray-400">
@@ -79,6 +99,29 @@ export const ResetPassword: React.FC = () => {
             <span className="font-semibold text-indigo-400">{email}</span>
           </p>
         </div>
+
+        {activeOtp && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-6 flex items-center justify-between gap-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 p-3.5 text-sm"
+          >
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="h-5 w-5 text-indigo-400 shrink-0" />
+              <div>
+                <p className="text-xs text-indigo-300 font-medium">Your Password Reset OTP:</p>
+                <p className="font-mono text-lg font-bold tracking-widest text-indigo-200">{activeOtp}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleQuickFill}
+              className="px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 text-xs font-semibold text-white transition-all shadow cursor-pointer"
+            >
+              Fill OTP
+            </button>
+          </motion.div>
+        )}
 
         {errorMessage && (
           <motion.div

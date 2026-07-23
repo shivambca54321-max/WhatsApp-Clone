@@ -1,26 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, AlertCircle, ArrowLeft, Sparkles } from 'lucide-react';
 import api from '../services/api';
 import useAuthStore from '../store/useAuthStore';
 
 export const VerifyEmail: React.FC = () => {
-  const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
+  const location = useLocation();
+  const email = location.state?.email || '';
+  const initialOtp = location.state?.initialOtp || '';
+
+  const [activeOtp, setActiveOtp] = useState<string>(initialOtp);
+  const [otp, setOtp] = useState<string[]>(initialOtp ? initialOtp.split('').slice(0, 6) : Array(6).fill(''));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const email = location.state?.email || '';
 
   useEffect(() => {
     if (!email) {
       navigate('/login');
     }
   }, [email, navigate]);
+
+  const handleQuickFill = () => {
+    if (activeOtp && activeOtp.length === 6) {
+      setOtp(activeOtp.split(''));
+    }
+  };
 
   const handleChange = (element: HTMLInputElement, index: number) => {
     if (isNaN(Number(element.value))) return;
@@ -104,6 +112,10 @@ export const VerifyEmail: React.FC = () => {
     try {
       const response = await api.post('/auth/resend-otp', { email });
       setSuccessMessage(response.data.message || 'A new OTP has been sent to your email.');
+      if (response.data.otp) {
+        setActiveOtp(response.data.otp);
+        setOtp(response.data.otp.split(''));
+      }
       if (response.data.alreadyVerified) {
         setTimeout(() => {
           navigate('/login');
@@ -140,6 +152,29 @@ export const VerifyEmail: React.FC = () => {
             <span className="font-semibold text-indigo-400">{email}</span>
           </p>
         </div>
+
+        {activeOtp && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-6 flex items-center justify-between gap-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 p-3.5 text-sm"
+          >
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="h-5 w-5 text-indigo-400 shrink-0" />
+              <div>
+                <p className="text-xs text-indigo-300 font-medium">Your Verification OTP Code:</p>
+                <p className="font-mono text-lg font-bold tracking-widest text-indigo-200">{activeOtp}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleQuickFill}
+              className="px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 text-xs font-semibold text-white transition-all shadow cursor-pointer"
+            >
+              Fill OTP
+            </button>
+          </motion.div>
+        )}
 
         {errorMessage && (
           <motion.div

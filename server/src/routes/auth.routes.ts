@@ -4,6 +4,7 @@ import {
   resendOTP,
   verifyEmail, 
   login, 
+  sendLoginOTP,
   logout, 
   refresh, 
   forgotPassword, 
@@ -13,6 +14,7 @@ import {
 import { 
   registerSchema, 
   loginSchema, 
+  sendLoginOTPSchema,
   forgotPasswordSchema, 
   resetPasswordSchema,
   verifyEmailSchema
@@ -28,6 +30,7 @@ router.post('/register', authLimiter, validate(registerSchema), register);
 router.post('/resend-otp', authLimiter, resendOTP);
 router.post('/verify-email', authLimiter, validate(verifyEmailSchema), verifyEmail);
 router.post('/login', authLimiter, validate(loginSchema), login);
+router.post('/send-login-otp', authLimiter, validate(sendLoginOTPSchema), sendLoginOTP);
 router.post('/logout', logout);
 router.post('/refresh', refresh);
 router.post('/forgot-password', authLimiter, validate(forgotPasswordSchema), forgotPassword);

@@ -71,6 +71,7 @@ export const register = async (
       status: 'success',
       message: 'Registration successful. Please check your email for the verification OTP.',
       email: user.email,
+      otp,
     });
   } catch (error) {
     next(error);
@@ -112,6 +113,7 @@ export const resendOTP = async (
     res.status(200).json({
       status: 'success',
       message: 'A new 6-digit OTP code has been sent to your email.',
+      otp,
     });
   } catch (error) {
     next(error);
@@ -274,6 +276,7 @@ export const login = async (
         status: 'unverified',
         message: 'Your email address is not verified yet. A 6-digit OTP code has been sent to your email.',
         email: user.email,
+        otp,
       });
       return;
     }
@@ -414,6 +417,38 @@ export const refresh = async (
   }
 };
 
+export const sendLoginOTP = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { email } = req.body;
+    const cleanEmail = (email || '').trim().toLowerCase();
+
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      throw new NotFoundError('No account found with this email address');
+    }
+
+    const otp = generateOTP();
+    user.verificationOTP = otp;
+    user.verificationOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    await sendVerificationOTPEmail(cleanEmail, otp);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'A 6-digit OTP code for login has been sent to your email.',
+      email: user.email,
+      otp,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const forgotPassword = async (
   req: Request,
   res: Response,
@@ -421,10 +456,10 @@ export const forgotPassword = async (
 ): Promise<void> => {
   try {
     const { email } = req.body;
+    const cleanEmail = (email || '').trim().toLowerCase();
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
-      // Return success to prevent user enumeration
       res.status(200).json({
         status: 'success',
         message: 'If the email exists, a password reset code has been sent.',
@@ -438,11 +473,12 @@ export const forgotPassword = async (
     user.resetPasswordOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
 
-    await sendPasswordResetOTPEmail(email, otp);
+    await sendPasswordResetOTPEmail(cleanEmail, otp);
 
     res.status(200).json({
       status: 'success',
       message: 'If the email exists, a password reset code has been sent.',
+      otp,
     });
   } catch (error) {
     next(error);
@@ -462,10 +498,13 @@ export const resetPassword = async (
       throw new NotFoundError('User not found');
     }
 
+    const cleanUserOtp = (user.resetPasswordOTP || '').toString().trim();
+    const cleanInputOtp = (otp || '').toString().trim();
+
     if (
       !user.resetPasswordOTP ||
       !user.resetPasswordOTPExpires ||
-      user.resetPasswordOTP !== otp ||
+      cleanUserOtp !== cleanInputOtp ||
       user.resetPasswordOTPExpires.getTime() < Date.now()
     ) {
       throw new BadRequestError('Invalid or expired password reset OTP');
