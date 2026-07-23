@@ -64,8 +64,10 @@ export const register = async (
 
     await user.save();
 
-    // Send verification OTP email
-    await sendVerificationOTPEmail(email, otp);
+    // Send verification OTP email in background (non-blocking)
+    sendVerificationOTPEmail(email, otp).catch((err) => {
+      logger.error('Background sendVerificationOTPEmail error: %O', err);
+    });
 
     res.status(201).json({
       status: 'success',
@@ -108,7 +110,9 @@ export const resendOTP = async (
     user.verificationOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
 
-    await sendVerificationOTPEmail(email, otp);
+    sendVerificationOTPEmail(email, otp).catch((err) => {
+      logger.error('Background sendVerificationOTPEmail error: %O', err);
+    });
 
     res.status(200).json({
       status: 'success',
@@ -270,7 +274,9 @@ export const login = async (
       user.verificationOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
       await user.save();
 
-      await sendVerificationOTPEmail(email, otp);
+      sendVerificationOTPEmail(email, otp).catch((err) => {
+        logger.error('Background sendVerificationOTPEmail error: %O', err);
+      });
 
       res.status(403).json({
         status: 'unverified',
@@ -436,7 +442,9 @@ export const sendLoginOTP = async (
     user.verificationOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
 
-    await sendVerificationOTPEmail(cleanEmail, otp);
+    sendVerificationOTPEmail(cleanEmail, otp).catch((err) => {
+      logger.error('Background sendVerificationOTPEmail error: %O', err);
+    });
 
     res.status(200).json({
       status: 'success',
@@ -473,7 +481,9 @@ export const forgotPassword = async (
     user.resetPasswordOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
 
-    await sendPasswordResetOTPEmail(cleanEmail, otp);
+    sendPasswordResetOTPEmail(cleanEmail, otp).catch((err) => {
+      logger.error('Background sendPasswordResetOTPEmail error: %O', err);
+    });
 
     res.status(200).json({
       status: 'success',

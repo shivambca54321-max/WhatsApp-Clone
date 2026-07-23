@@ -14,6 +14,9 @@ const getTransporter = () => {
         user,
         pass,
       },
+      connectionTimeout: 4000,
+      greetingTimeout: 4000,
+      socketTimeout: 4000,
       tls: {
         rejectUnauthorized: false,
       },
@@ -25,6 +28,9 @@ const getTransporter = () => {
     port,
     secure: port === 465,
     auth: user && pass ? { user, pass } : undefined,
+    connectionTimeout: 4000,
+    greetingTimeout: 4000,
+    socketTimeout: 4000,
     tls: {
       rejectUnauthorized: false,
     },
@@ -43,12 +49,19 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
     }
 
     const transporter = getTransporter();
-    await transporter.sendMail({
+    
+    const sendPromise = transporter.sendMail({
       from,
       to,
       subject,
       html,
     });
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('SMTP sending timed out after 4 seconds')), 4000)
+    );
+
+    await Promise.race([sendPromise, timeoutPromise]);
     logger.info(`Email sent successfully to ${to}`);
   } catch (error) {
     logger.error('Failed to send email to %s: %O', to, error);
