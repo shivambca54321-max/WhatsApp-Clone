@@ -253,44 +253,46 @@ export const SidebarList: React.FC<SidebarListProps> = ({
       {activeTab !== 'settings' && (
         <div className="p-5 pb-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold font-sans tracking-wide capitalize">{activeTab}</h1>
+            <h1 className="text-2xl font-bold font-sans tracking-tight capitalize text-white">{activeTab}</h1>
             {activeTab === 'chats' && (
               <div className="flex items-center gap-2">
                 <button 
                   onClick={openCreateGroup}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-400 border border-indigo-500/10 hover:bg-indigo-600 hover:text-white transition-all cursor-pointer"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-600 hover:text-white transition-all cursor-pointer ios-bounce"
                   title="Create Group"
                 >
-                  <Plus className="h-4.5 w-4.5" />
+                  <span className="material-symbols-outlined text-[20px]">groups</span>
                 </button>
                 <button 
                   onClick={openSearchUsers}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-400 border border-indigo-500/10 hover:bg-indigo-600 hover:text-white transition-all cursor-pointer"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-600 hover:text-white transition-all cursor-pointer ios-bounce"
                   title="Start New Chat"
                 >
-                  <MessageSquarePlus className="h-4.5 w-4.5" />
+                  <span className="material-symbols-outlined text-[20px]">chat</span>
                 </button>
               </div>
             )}
             {activeTab === 'contacts' && (
               <button 
                 onClick={openSearchUsers}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-400 border border-indigo-500/10 hover:bg-indigo-600 hover:text-white transition-all cursor-pointer"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-600 hover:text-white transition-all cursor-pointer ios-bounce"
                 title="Add Contact"
               >
-                <UserPlus className="h-4.5 w-4.5" />
+                <span className="material-symbols-outlined text-[20px]">person_add</span>
               </button>
             )}
           </div>
           
           <div className="relative mt-4">
-            <Search className="absolute top-1/2 left-3.5 h-4.5 w-4.5 -translate-y-1/2 text-gray-500" />
+            <span className="material-symbols-outlined absolute top-1/2 left-3.5 -translate-y-1/2 text-gray-400 text-[20px]">
+              search
+            </span>
             <input
               type="text"
               placeholder={`Search ${activeTab}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-gray-800 bg-[#12131b] py-2.5 pr-4 pl-10 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/15 transition-all"
+              className="w-full rounded-xl border border-gray-800 bg-[#12131b] py-2.5 pr-4 pl-10 text-sm text-white placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all font-sans"
             />
           </div>
         </div>
@@ -342,44 +344,44 @@ export const SidebarList: React.FC<SidebarListProps> = ({
                     <div
                       key={chat._id}
                       onClick={() => setSelectedChatId(chat._id)}
-                      className={`flex items-center gap-3.5 rounded-xl p-3.5 transition-all cursor-pointer select-none border border-transparent ${
+                      className={`flex items-center gap-3.5 rounded-[14px] p-3.5 transition-all cursor-pointer select-none border ios-bounce ${
                         isSelected 
-                          ? 'bg-indigo-600/10 border-indigo-500/25 text-white' 
-                          : 'hover:bg-[#12131b]/60 text-gray-300'
+                          ? 'bg-emerald-500/15 border-emerald-500/30 text-white shadow-md' 
+                          : 'bg-[#12131b]/30 border-gray-800/40 hover:bg-[#12131b] hover:border-gray-800 text-gray-300'
                       }`}
                     >
                       {/* Avatar */}
                       <div className="relative shrink-0">
-                        <div className="h-11 w-11 overflow-hidden rounded-xl border border-gray-800 bg-gray-900">
+                        <div className="h-12 w-12 overflow-hidden rounded-full border border-gray-800 bg-gray-900 shadow-sm">
                           {chatPhoto ? (
                             <img src={chatPhoto} alt="Avatar" className="h-full w-full object-cover" />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-indigo-500/20 font-bold text-indigo-300 text-sm">
+                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-tr from-emerald-600 to-green-500 font-bold text-white text-base">
                               {chatName.charAt(0)}
                             </div>
                           )}
                         </div>
                         {isOnline && !chat.isGroupChat && (
-                          <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0b0c14] bg-emerald-500" />
+                          <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-[#0b0c14] bg-emerald-500 online-glow" />
                         )}
                       </div>
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <h3 className="text-sm font-semibold tracking-wide truncate">{chatName}</h3>
-                          <span className="text-[11px] text-gray-500">
+                          <h3 className="text-sm font-semibold tracking-tight truncate">{chatName}</h3>
+                          <span className={`text-[11px] font-medium ${unreadCount > 0 ? 'text-emerald-400 font-bold' : 'text-gray-500'}`}>
                             {chat.latestMessage 
                               ? new Date(chat.latestMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                               : ''}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <p className="text-xs text-gray-500 truncate">
+                          <p className="text-xs text-gray-400 truncate">
                             {chat.latestMessage ? chat.latestMessage.text || '📷 Attachment' : 'No messages yet'}
                           </p>
                           {unreadCount > 0 && (
-                            <span className="flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-indigo-500 px-1 text-[10px] font-bold text-white">
+                            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-emerald-500 px-1.5 text-[10px] font-bold text-black shadow-md shadow-emerald-500/20">
                               {unreadCount}
                             </span>
                           )}

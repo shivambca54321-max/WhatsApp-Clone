@@ -265,80 +265,87 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({ chatId, onBack, 
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#07080e] text-white select-none relative">
+    <div className="flex-1 flex flex-col h-full bg-[#07080e] text-white select-none relative overflow-hidden font-sans">
       
-      {/* Header */}
-      <div className="h-[70px] border-b border-gray-800/60 bg-[#0b0c14]/90 flex items-center justify-between px-6 z-10">
-        <div className="flex items-center gap-4 min-w-0">
-          <button onClick={onBack} className="md:hidden text-gray-400 hover:text-white mr-1 cursor-pointer">
-            <ArrowLeft className="h-5 w-5" />
+      {/* Lumina Glassmorphism Header */}
+      <div className="h-[70px] border-b border-gray-800/60 glass-header bg-[#07080e]/85 flex items-center justify-between px-6 z-20 shadow-sm">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <button onClick={onBack} className="md:hidden text-gray-400 hover:text-white mr-1 cursor-pointer ios-bounce">
+            <span className="material-symbols-outlined text-[24px]">arrow_back</span>
           </button>
           
-          <div className="relative shrink-0">
-            <div className="h-10 w-10 overflow-hidden rounded-xl border border-gray-800 bg-gray-900">
+          <div className="relative shrink-0 ios-bounce">
+            <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-emerald-500/40 bg-gray-900 shadow-sm">
               {displayPhoto ? (
                 <img src={displayPhoto} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-indigo-500/20 font-bold text-indigo-300 text-sm">
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-tr from-emerald-600 to-green-500 font-bold text-white text-sm">
                   {displayTitle.charAt(0)}
                 </div>
               )}
             </div>
             {isOnline && !chat.isGroupChat && (
-              <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#0b0c14] bg-emerald-500" />
+              <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#07080e] bg-emerald-500 online-glow" />
             )}
           </div>
 
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold truncate leading-tight">{displayTitle}</h3>
-            <span className="text-[11px] text-gray-500">{detailSub}</span>
+            <h3 className="text-sm font-semibold tracking-tight truncate leading-tight text-white">{displayTitle}</h3>
+            <span className={`text-[11px] font-medium ${isOnline ? 'text-emerald-400' : 'text-gray-500'}`}>{detailSub}</span>
           </div>
         </div>
 
         {/* Header Actions */}
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => triggerCall('voice')}
-            className="p-2.5 rounded-xl bg-gray-800/30 text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all cursor-pointer"
-            title="Voice Call"
-          >
-            <Phone className="h-4.5 w-4.5" />
-          </button>
+        <div className="flex items-center gap-2.5 text-gray-400">
           <button 
             onClick={() => triggerCall('video')}
-            className="p-2.5 rounded-xl bg-gray-800/30 text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all cursor-pointer"
+            className="p-2 rounded-xl hover:bg-gray-800/50 hover:text-white transition-all cursor-pointer ios-bounce"
             title="Video Call"
           >
-            <Video className="h-4.5 w-4.5" />
+            <span className="material-symbols-outlined text-[22px]">videocam</span>
           </button>
-          <button className="p-2.5 rounded-xl bg-transparent text-gray-500 hover:text-white cursor-pointer">
-            <MoreVertical className="h-4.5 w-4.5" />
+          <button 
+            onClick={() => triggerCall('voice')}
+            className="p-2 rounded-xl hover:bg-gray-800/50 hover:text-white transition-all cursor-pointer ios-bounce"
+            title="Voice Call"
+          >
+            <span className="material-symbols-outlined text-[22px]">call</span>
+          </button>
+          <button className="p-2 rounded-xl hover:bg-gray-800/50 hover:text-white transition-all cursor-pointer ios-bounce">
+            <span className="material-symbols-outlined text-[22px]">more_vert</span>
           </button>
         </div>
       </div>
 
-      {/* Messages Feed */}
+      {/* Messages Feed with Chat Wallpaper Background */}
       <div 
-        className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-repeat"
+        className="flex-1 overflow-y-auto px-6 py-6 space-y-4 chat-wallpaper relative z-10"
         style={{ 
-          backgroundImage: user?.chatWallpaper ? `url(${user.chatWallpaper})` : 'none',
-          backgroundSize: '360px'
+          backgroundImage: user?.chatWallpaper ? `url(${user.chatWallpaper})` : undefined,
+          backgroundSize: 'cover'
         }}
       >
+        {/* Sticky Date Separator Pill */}
+        <div className="sticky top-2 z-20 flex justify-center my-2">
+          <span className="bg-[#141824]/90 backdrop-blur-md px-4 py-1 rounded-full text-[10px] font-bold text-gray-400 shadow-sm uppercase tracking-widest border border-gray-800/50">
+            Today
+          </span>
+        </div>
+
         {messages.map((msg) => {
           const isMe = msg.sender._id === user?.id;
           return (
             <div key={msg._id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               
               {/* Message Bubble container */}
-              <div className="relative group max-w-[70%]">
+              <div className="relative group max-w-[75%]">
                 
                 {/* Reply display box inside bubble */}
                 {msg.parentMessage && (
-                  <div className={`mb-1.5 p-2 rounded-lg text-xs border-l-4 text-gray-400 max-w-full ${
-                    isMe ? 'bg-black/20 border-indigo-500' : 'bg-gray-800/30 border-gray-600'
+                  <div className={`mb-1.5 p-2 rounded-xl text-xs border-l-4 max-w-full ${
+                    isMe ? 'bg-black/30 border-emerald-400 text-gray-200' : 'bg-gray-800/40 border-emerald-500 text-gray-300'
                   }`}>
-                    <p className="font-bold text-[10px] uppercase text-indigo-400">
+                    <p className="font-bold text-[10px] uppercase text-emerald-400">
                       {msg.parentMessage.sender.fullName}
                     </p>
                     <p className="truncate text-gray-400">{msg.parentMessage.text}</p>
@@ -346,32 +353,34 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({ chatId, onBack, 
                 )}
 
                 {/* Main bubble body */}
-                <div className={`rounded-2xl px-4 py-2.5 text-sm shadow-md border ${
+                <div className={`rounded-2xl px-4 py-3 text-sm shadow-md transition-all ${
                   isMe 
-                    ? 'bg-indigo-600 border-indigo-500/30 text-white rounded-tr-none' 
-                    : 'bg-[#12131b] border-gray-800/80 text-gray-200 rounded-tl-none'
+                    ? 'bg-gradient-to-tr from-emerald-600 to-green-500 text-white rounded-tr-none shadow-[0_4px_14px_rgba(37,211,102,0.25)] border border-emerald-400/20' 
+                    : 'bg-[#12131c] border border-gray-800/80 text-gray-100 rounded-tl-none shadow-[0_2px_8px_rgba(0,0,0,0.2)]'
                 }`}>
                   
                   {/* Sender name for group chats */}
                   {chat.isGroupChat && !isMe && (
-                    <span className="block text-[10px] font-bold text-indigo-400 mb-1">
+                    <span className="block text-[10px] font-bold text-emerald-400 mb-1">
                       {msg.sender.fullName}
                     </span>
                   )}
 
                   {/* Attachment render */}
                   {msg.attachment && (
-                    <div className="mb-2 max-w-full overflow-hidden rounded-xl bg-black/10 border border-black/5 p-2 flex items-center gap-3">
-                      <FileText className="h-8 w-8 text-indigo-300" />
+                    <div className="mb-2 max-w-full overflow-hidden rounded-xl bg-black/20 border border-white/10 p-2.5 flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[28px] text-emerald-300">
+                        description
+                      </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-semibold text-white truncate">{msg.attachment.fileName}</p>
-                        <p className="text-[10px] text-gray-400">{(msg.attachment.fileSize / 1024).toFixed(1)} KB</p>
+                        <p className="text-[10px] text-gray-300/80">{(msg.attachment.fileSize / 1024).toFixed(1)} KB</p>
                       </div>
                       <a 
                         href={msg.attachment.url} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="text-xs font-bold text-indigo-300 hover:text-indigo-200"
+                        className="text-xs font-bold text-emerald-300 hover:text-white px-2 py-1 rounded bg-white/10"
                       >
                         Download
                       </a>
@@ -379,39 +388,39 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({ chatId, onBack, 
                   )}
 
                   {/* Message content text */}
-                  <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                  <p className="whitespace-pre-wrap break-words leading-relaxed">{msg.text}</p>
                   
                   {/* Timestamp and receipts */}
-                  <div className="flex items-center justify-end gap-1 mt-1 text-[9px] text-gray-400/85">
+                  <div className={`flex items-center justify-end gap-1 mt-1 text-[9px] ${isMe ? 'text-white/80' : 'text-gray-400'}`}>
                     <span>
                       {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                     {isMe && (
-                      <span className="text-indigo-300 ml-1">
-                        {msg.readBy?.length > 0 ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
+                      <span className="material-symbols-outlined text-[13px] fill-1 text-white">
+                        {msg.readBy?.length > 0 ? 'done_all' : 'done'}
                       </span>
                     )}
                   </div>
                 </div>
 
                 {/* Floating Actions overlay */}
-                <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-all ${
+                <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-all z-20 ${
                   isMe ? 'right-full mr-2 flex-row-reverse' : 'left-full ml-2'
                 }`}>
                   <button 
                     onClick={() => setReplyingToMessage(msg)}
-                    className="p-1 rounded bg-[#12131b] border border-gray-800 hover:bg-gray-800 text-gray-400 hover:text-white cursor-pointer"
+                    className="p-1.5 rounded-lg bg-[#12131b] border border-gray-800 hover:bg-gray-800 text-gray-400 hover:text-white cursor-pointer ios-bounce"
                     title="Reply"
                   >
-                    <CornerUpLeft className="h-3.5 w-3.5" />
+                    <span className="material-symbols-outlined text-[16px]">reply</span>
                   </button>
                   
                   {/* Emoji Quick reactions */}
-                  {['👍', '❤️', '😂', '😮', '😢', '🙏'].map((emoji) => (
+                  {['👍', '❤️', '😂', '😮', '🔥', '🚀'].map((emoji) => (
                     <button
                       key={emoji}
                       onClick={() => handleReact(msg._id, emoji)}
-                      className="p-1 rounded bg-[#12131b] border border-gray-800 hover:scale-110 cursor-pointer"
+                      className="p-1 rounded-lg bg-[#12131b] border border-gray-800 hover:scale-110 cursor-pointer text-xs"
                     >
                       {emoji}
                     </button>
@@ -420,20 +429,20 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({ chatId, onBack, 
                   {/* Delete option */}
                   <button 
                     onClick={() => handleDelete(msg._id, isMe ? 'everyone' : 'me')}
-                    className="p-1 rounded bg-[#12131b] border border-gray-800 hover:bg-red-500/10 hover:text-red-400 text-gray-500 cursor-pointer"
+                    className="p-1.5 rounded-lg bg-[#12131b] border border-gray-800 hover:bg-red-500/10 hover:text-red-400 text-gray-500 cursor-pointer ios-bounce"
                     title="Delete Message"
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
                   </button>
                 </div>
 
                 {/* Reactions output display */}
                 {msg.reactions?.length > 0 && (
-                  <div className="absolute -bottom-2.5 right-2 flex items-center gap-1 rounded-full bg-[#12131b] border border-gray-800 px-1.5 py-0.5 text-[10px] shadow-sm select-none">
+                  <div className="absolute -bottom-2.5 right-2 flex items-center gap-1 rounded-full bg-[#12131b] border border-gray-800 px-2 py-0.5 text-[10px] shadow-md select-none">
                     {msg.reactions.slice(0, 3).map((r: any, idx: number) => (
                       <span key={idx}>{r.emoji}</span>
                     ))}
-                    <span className="text-gray-500 ml-0.5 font-bold">{msg.reactions.length}</span>
+                    <span className="text-gray-400 ml-0.5 font-bold">{msg.reactions.length}</span>
                   </div>
                 )}
 
@@ -444,12 +453,12 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({ chatId, onBack, 
 
         {/* Typing indicator bubble */}
         {otherUserTyping && (
-          <div className="flex items-center gap-2.5 bg-[#12131b] border border-gray-800/80 px-4 py-2.5 rounded-2xl rounded-tl-none text-xs text-gray-400 w-max shadow-sm">
-            <span className="font-semibold">Typing</span>
+          <div className="flex items-center gap-2.5 bg-[#12131c] border border-gray-800/80 px-4 py-2.5 rounded-2xl rounded-tl-none text-xs text-emerald-400 w-max shadow-sm">
+            <span className="font-semibold text-gray-300">Typing</span>
             <div className="flex gap-1 items-center">
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
@@ -459,58 +468,78 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({ chatId, onBack, 
 
       {/* Replying indicator panel */}
       {replyingToMessage && (
-        <div className="px-6 py-2.5 bg-[#0b0c14] border-t border-gray-800/50 flex items-center justify-between text-xs text-gray-400">
+        <div className="px-6 py-2.5 bg-[#07080e] border-t border-gray-800/50 flex items-center justify-between text-xs text-gray-400 z-20">
           <div className="min-w-0">
-            <p className="font-semibold text-indigo-400">Replying to {replyingToMessage.sender.fullName}</p>
+            <p className="font-bold text-emerald-400">Replying to {replyingToMessage.sender.fullName}</p>
             <p className="truncate">{replyingToMessage.text}</p>
           </div>
           <button onClick={() => setReplyingToMessage(null)} className="text-gray-500 hover:text-white cursor-pointer">
-            <X className="h-4 w-4" />
+            <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
       )}
 
-      {/* Input area */}
-      <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-800/60 bg-[#0b0c14]/90 flex items-center gap-3.5 relative">
+      {/* Lumina Message Input Bar (Bottom Section) */}
+      <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-800/60 glass-header bg-[#07080e]/90 flex items-center gap-3 relative z-20">
         <button 
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="p-2.5 rounded-xl bg-gray-800/30 text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all cursor-pointer"
+          className="w-10 h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all cursor-pointer ios-bounce shrink-0"
           title="Attach File"
           disabled={uploadingFile}
         >
           {uploadingFile ? (
-            <div className="h-4.5 w-4.5 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+            <div className="h-4.5 w-4.5 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
           ) : (
-            <Paperclip className="h-4.5 w-4.5" />
+            <span className="material-symbols-outlined text-[24px]">add</span>
           )}
           <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
         </button>
 
-        <div className="relative flex-1">
+        <div className="flex-1 flex items-center bg-[#12131c] rounded-full px-4 py-1.5 border border-gray-800 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+          <button 
+            type="button"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className="text-gray-400 hover:text-white mr-2 cursor-pointer ios-bounce"
+            title="Emoji Keyboard"
+          >
+            <span className="material-symbols-outlined text-[22px]">sentiment_satisfied</span>
+          </button>
+          
           <input
             type="text"
             placeholder="Type a message..."
             value={inputText}
             onChange={handleInputChange}
-            className="w-full rounded-xl border border-gray-800 bg-[#12131b] py-2.5 pr-12 pl-4 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500/40"
+            className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder:text-gray-500 font-sans text-sm py-1.5 outline-none"
           />
-          <button 
-            type="button"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="absolute top-1/2 right-4 -translate-y-1/2 text-gray-500 hover:text-white cursor-pointer"
-            title="Emoji Keyboard"
-          >
-            <Smile className="h-4.5 w-4.5" />
-          </button>
+
+          <div className="flex items-center gap-1.5 ml-2 text-gray-400">
+            <button 
+              type="button" 
+              onClick={() => fileInputRef.current?.click()}
+              className="hover:text-white cursor-pointer ios-bounce"
+            >
+              <span className="material-symbols-outlined text-[22px]">attach_file</span>
+            </button>
+            <button 
+              type="button" 
+              onClick={() => fileInputRef.current?.click()}
+              className="hover:text-white cursor-pointer ios-bounce"
+            >
+              <span className="material-symbols-outlined text-[22px]">photo_camera</span>
+            </button>
+          </div>
         </div>
 
         <button 
           type="submit"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-md active:scale-95 transition-all cursor-pointer"
-          title="Send"
+          className="w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-tr from-emerald-600 to-green-500 text-white shadow-lg shadow-emerald-500/25 active:scale-95 transition-all cursor-pointer ios-bounce shrink-0"
+          title={inputText.trim() ? 'Send' : 'Voice Message'}
         >
-          <Send className="h-4.5 w-4.5" />
+          <span className="material-symbols-outlined text-[22px] fill-1">
+            {inputText.trim() ? 'send' : 'mic'}
+          </span>
         </button>
 
         {/* Emoji Keyboard panel */}

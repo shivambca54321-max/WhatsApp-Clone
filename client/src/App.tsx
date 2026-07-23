@@ -56,10 +56,35 @@ export const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#090a0f] text-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
-          <p className="text-sm font-medium tracking-wide text-indigo-400 font-sans">Loading Velo...</p>
+      <div className="relative flex h-screen w-screen flex-col items-center justify-center bg-[#07080e] p-6 text-white overflow-hidden font-sans">
+        {/* Ambient background glow */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+        {/* Brand Identity & Glowing Icon */}
+        <div className="z-10 flex flex-col items-center gap-6">
+          <div className="relative w-20 h-20 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-green-400 shadow-xl shadow-emerald-500/30 animate-lumina-glow">
+            <span className="material-symbols-outlined text-[44px] text-white fill-1">
+              all_inclusive
+            </span>
+          </div>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-white font-sans">Lumina</h1>
+            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400 mt-1">MESSAGING REDEFINED</p>
+          </div>
+        </div>
+
+        {/* Loading Indicator & Encryption Badge */}
+        <div className="absolute bottom-12 w-full flex flex-col items-center gap-4">
+          <div className="flex gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500/30 animate-bounce" style={{ animationDelay: '0s' }} />
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
+            <div className="w-2 h-2 rounded-full bg-emerald-500/30 animate-bounce" style={{ animationDelay: '0.4s' }} />
+          </div>
+          <div className="flex items-center gap-2 text-gray-500 text-xs tracking-wider uppercase font-semibold">
+            <span className="material-symbols-outlined text-[16px] text-gray-400">lock</span>
+            <span>End-to-End Encrypted</span>
+          </div>
         </div>
       </div>
     );
