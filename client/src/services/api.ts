@@ -43,9 +43,15 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
+    const requestUrl = originalRequest.url || '';
+
     // If 401 and it's not a retry already
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (originalRequest.url === '/auth/refresh' || originalRequest.url === '/auth/login') {
+      if (requestUrl.includes('/auth/refresh') || requestUrl.includes('/auth/login')) {
         // Clear auth if refresh itself fails
         useAuthStore.getState().clearAuth();
         return Promise.reject(error);
